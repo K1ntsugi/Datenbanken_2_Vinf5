@@ -1,0 +1,12 @@
+DELIMITER $$
+CREATE FUNCTION f_age(
+    date_of_birth DATE
+)
+RETURNS VARCHAR(20)
+NOT DETERMINISTIC
+BEGIN
+	DECLARE result VARCHAR(20);
+    SET result = SELECT DATE_FORMAT(FROM_DAYS(DATEDIFF(now(), date_of_birth)), '%Y') + 0 as temp;
+    RETURN (result);
+END $$
+DELIMITER ;
