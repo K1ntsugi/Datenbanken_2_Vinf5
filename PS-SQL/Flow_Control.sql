@@ -124,4 +124,87 @@ LOOP-Statement:
 - A LOOP statement can be labeled.
 */
 
--- Example 2: Repeat
+-- Example 2: Repeat ~ Do-While-Loop
+DROP PROCEDURE if exists testRepeat;
+
+DELIMITER $$
+CREATE PROCEDURE testRepeat(p1 INT)
+BEGIN
+    SET @x = 0;
+    REPEAT
+        SET @x = @x+1;
+    UNTIL @x > p1 END REPEAT;
+END $$
+DELIMITER ;
+CALL testRepeat(1000);
+SELECT @x;
+/*
+- The statement list within a REPEAT statement is
+  repeated until the search_condition expression is
+  true.
+- Thus, a REPEAT always enters the loop at least
+  once.
+- Statement_list consists of one or more
+  statements, each terminated by a semicolon (;)
+  statement delimiter.
+- A REPEAT statement can be labeled.
+*/
+
+-- Example 3: While == Übung2
+-- https://www.mysqltutorial.org/mysql-stored-procedure/mysql-while-loop/
+DROP TABLE if exists calendars;
+CREATE TABLE calendars(
+    id INT AUTO_INCREMENT,
+    fulldate DATE UNIQUE,
+    day TINYINT NOT NULL,
+    month TINYINT NOT NULL,
+    quarter TINYINT NOT NULL,
+    year INT NOT NULL,
+    PRIMARY KEY(id)
+);
+
+DROP PROCEDURE if exists InsertCalendar;
+DELIMITER $$
+
+CREATE PROCEDURE InsertCalendar(dt DATE)
+BEGIN
+    INSERT INTO calendars(
+        fulldate,
+        day,
+        month,
+        quarter,
+        year
+    )
+    VALUES(
+        dt,
+        EXTRACT(DAY FROM dt),
+        EXTRACT(MONTH FROM dt),
+        EXTRACT(QUARTER FROM dt),
+        EXTRACT(YEAR FROM dt)
+    );
+END$$
+
+DELIMITER ;
+
+
+DROP PROCEDURE if exists LoadCalendars;
+
+DELIMITER $$
+CREATE PROCEDURE LoadCalendars(
+    startDate Date,
+    day INT
+)
+BEGIN
+    DECLARE count INT DEFAULT 1;
+    DECLARE dt DATE DEFAULT startDate;
+
+    WHILE count <= day DO
+        CALL InsertCalendar(dt);
+        SET count = count+1;
+        SET dt = DATE_ADD(dt, INTERVAL 1 day);
+    END WHILE;
+
+END $$
+DELIMITER ;
+CALL LoadCalendars('2022-01-01',31);
+SELECT * FROM calendars WHERE 1;
