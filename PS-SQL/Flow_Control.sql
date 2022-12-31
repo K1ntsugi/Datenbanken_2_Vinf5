@@ -31,7 +31,7 @@ DELIMITER ;
 
 -- 1.3
 SHOW PROCEDURE STATUS
-WHERE db = 'classicmodels';
+    WHERE db = 'classicmodels';
 
 -- 2
 DROP PROCEDURE if exists my_sqrt;
@@ -49,7 +49,7 @@ DROP PROCEDURE if exists my_sqrt2;
 DELIMITER $$
 CREATE PROCEDURE my_sqrt2(IN input INT, OUT output FLOAT)
 BEGIN
-   set output = sqrt(input);
+    set output = sqrt(input);
 END $$
 DELIMITER ;
 
@@ -57,6 +57,71 @@ CALL my_sqrt2(13, @outval);
 SELECT @outval;
 
 /*
- Flow Control 2:
-
+Flow Control 2:
+New Statements in this lecture:
+- Iterate
+- Leave
+- Return
+- Loop
+- Repeat
+- While
  */
+-- Example 1: Iterate, Leave, Loop
+DROP PROCEDURE if exists loopTest;
+DELIMITER $$
+CREATE PROCEDURE loopTest()
+BEGIN
+    DECLARE i INT;
+    SET i = 0;
+    loop1:
+    LOOP
+        SET i = i+1;
+        IF i >= 10 THEN
+            LEAVE loop1;
+            /*
+            - This statement is used to exit the flow control
+              construct that has the given label.
+            - If the label is for the outermost stored program-block(scope!), LEAVE exits the program.
+            - LEAVE can be used within BEGIN ... END or loop
+              constructs (LOOP, REPEAT, WHILE)
+             */
+        ELSEIF MOD(i,2)=0 THEN
+            ITERATE loop1; -- ITERATE means “start the loop again.”
+             -- ITERATE can appear only within LOOP, REPEAT,and WHILE statements
+        END IF;
+        SELECT CONCAT(i," is an odd number");
+    END LOOP loop1;
+END $$
+DELIMITER ;
+
+/*
+RETURN-Statement: Siehe MySQL_Stores.Programs.sql -> isRich()
+- The RETURN statement terminates execution of
+  a stored function and returns the value expr to the
+  function caller.
+- There must be at least one RETURN statement in
+  a stored function.
+- There may be more than one if the function has
+  multiple exit points.
+- This statement is NOT USED in STORED PROCEDURES,
+  triggers, or events. The LEAVE statement can be
+  used to exit a stored program of those types.
+ */
+
+ /*
+LOOP-Statement:
+- LOOP implements a simple loop construct,
+  enabling repeated execution of the statement list,
+  which consists of one or more statements, each
+  terminated by a semicolon (;) statement delimiter.
+- The statements within the loop are repeated until
+  the loop is terminated. Usually, this is
+  accomplished with a LEAVE statement. Within a
+  stored function, RETURN can also be used,
+  which exits the function entirely.
+- Neglecting to include a loop-termination
+  statement results in an infinite loop.
+- A LOOP statement can be labeled.
+*/
+
+-- Example 2: Repeat
